@@ -1,0 +1,9 @@
+/node_modules
+/build
+.env
+yarn.lock
+package-lock.json
+vendas.xlsx
+vendas-teste.xlsx
+fills.txt
+sellfills.txt

@@ -3,8 +3,18 @@ import XLSX from "xlsx";
 import WebSocket from "ws";
 import dotenv from "dotenv";
 import { getBalance } from "./Controllers/balanceController";
+import express from "express";
+import cors from "cors";
+import routes from "./routes";
+
+
 const { startNgrok } = require("./Controllers/ngrokController");
 dotenv.config();
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+app.use(routes);
 
 const SYMBOL = process.env.SYMBOL;
 const STREAM_URL = process.env.STREAM_URL;
@@ -14,7 +24,7 @@ const ASSET = process.env.ASSET!;
 const PORT = parseInt(process.env.PORT || '8080');
 
 startNgrok(PORT).then((ngrokUrl: string) => {
-  // Lógica do WebSocket e operações de compra/venda aqui
+
   const ws: WebSocket = new WebSocket(
     `${STREAM_URL}/${SYMBOL?.toLowerCase()}@bookTicker`
   );
@@ -53,7 +63,7 @@ startNgrok(PORT).then((ngrokUrl: string) => {
   
     try {
       const obj = JSON.parse(str);
-      console.clear();
+      // console.clear();
   
       console.log(`Real Balance ${ASSET}: ${availableBalance}`);
       console.log(`Virtual Balance ${ASSET}: ${virtualBalance}`);
@@ -152,6 +162,13 @@ startNgrok(PORT).then((ngrokUrl: string) => {
       process.exit(1);
     }
   };
+
+  // app.post('/webhook', tradingViewWebhook);
+
+  // Inicia o servidor Express
+  app.listen(PORT, () => {
+    console.log(`🚀 Server is running on port ${PORT}`);
+  });
 
 
 }).catch((err: any)=> {

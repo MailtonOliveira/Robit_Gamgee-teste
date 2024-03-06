@@ -1,7 +1,7 @@
 import axios from "axios";
 import crypto from "crypto";
 import dotenv from "dotenv";
-import { getBalance } from "./balanceController";
+//import { getBalance } from "./balanceController";
 dotenv.config();
 
 interface NewOrderData {

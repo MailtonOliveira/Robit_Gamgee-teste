@@ -3,6 +3,9 @@ import { buy, sell } from "./orderController"; // Importe as funções de compra
 import dotenv from "dotenv";
 dotenv.config();
 
+// Variável de controle de estado para verificar se uma ordem já foi executada
+let orderExecuted = false;
+
 // Função para lidar com o webhook da TradingView
 class TradingViewWebhook {
   async  viewWebhook(req: Request, res: Response, next: NextFunction) {
@@ -11,6 +14,11 @@ class TradingViewWebhook {
       const alertData = req.body;
       console.log(alertData) // Supondo que os dados do webhook estejam no corpo da solicitação
       
+       // Verifique se uma ordem já foi executada
+       if (orderExecuted) {
+        res.status(400).send('Order already executed');
+        return;
+      }
   
       // Lógica para determinar se deve comprar ou vender com base nos dados do webhook
       if (alertData.condition === 'BUY') {

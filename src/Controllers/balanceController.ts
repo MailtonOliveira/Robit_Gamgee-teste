@@ -19,7 +19,7 @@ const asset = process.env.ASSET!;
 
 async function newBalance(data: NewBalanceData) {
   if (!apiKey || !apiSecret) {
-    throw new Error("Preencha corretamente sua API KEY e SECRET KEY");
+    throw new Error("Preencha sua API KEY e SECRET KEY");
   }
 
   data.timestamp = Date.now();

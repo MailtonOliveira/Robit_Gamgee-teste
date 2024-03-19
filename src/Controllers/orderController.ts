@@ -1,7 +1,6 @@
 import axios from "axios";
 import crypto from "crypto";
 import dotenv from "dotenv";
-//import { getBalance } from "./balanceController";
 dotenv.config();
 
 interface NewOrderData {
@@ -29,7 +28,7 @@ const ASSET = process.env.ASSET!;
 
 async function newOrder(data: NewOrderData) {
   if (!apiKey || !apiSecret) {
-    throw new Error("Preencha corretamente sua API KEY e SECRET KEY");
+    throw new Error("Preencha API KEY e SECRET KEY");
   }
 
   data.type = "MARKET";
@@ -37,7 +36,7 @@ async function newOrder(data: NewOrderData) {
   data.side;
   data.quantity;
   data.timestamp = Date.now();
-  data.recvWindow = 5000; // máximo permitido, default 5000
+  data.recvWindow = 5000;
 
   const dataAsRecord: Record<string, string> = Object.fromEntries(
     Object.entries(data).map(([key, value]) => [key, String(value)])
@@ -63,8 +62,8 @@ async function newOrder(data: NewOrderData) {
 }
 
 
-function buy(symbol: string, quoteOrderQty: number): Promise<any> {
-  const data: NewOrderData = { symbol, side: "BUY", quoteOrderQty };
+function buy(symbol: string, quantity: number): Promise<any> {
+  const data: NewOrderData = { symbol, side: "BUY", quantity };
   return newOrder(data);
 }
 

@@ -3,7 +3,7 @@ import express from "express";
 import cors from "cors";
 import routes from "./routes";
 import { SYMBOL, STREAM_URL, PROFIT, BUY_QTY, ASSET, PORT } from "./Configs/config";
-import { initializeWebSocket } from "./services/services";
+import { initializeWebSocket } from "./services/monitorService";
 
 
 const { startNgrok } = require("./Controllers/ngrokController");
@@ -16,7 +16,7 @@ app.use(routes);
 
 startNgrok(PORT).then((ngrokUrl: string) => {
 
-  initializeWebSocket(SYMBOL, STREAM_URL, ASSET, BUY_QTY, PROFIT);
+  initializeWebSocket(SYMBOL, STREAM_URL, ASSET);
  
 
   // Inicia o servidor Express

@@ -1,11 +1,11 @@
 import express from 'express';
-import tradingViewWebhook from './../Controllers/webhookController';
+import {TradingViewWebhook} from './../Controllers/webhookController';
 
 const routes = express.Router();
 
-const Webhook = new tradingViewWebhook();
+const webhook = new TradingViewWebhook();
 
 // Rota para lidar com as solicitações do webhook da TradingView
-routes.post('/order', Webhook.viewWebhook)
+routes.post('/order', webhook.viewWebhook)
 
 export default routes;

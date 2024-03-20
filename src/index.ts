@@ -9,7 +9,7 @@ import { Request, Response } from "express";
 import { SYMBOL, STREAM_URL, ASSET, PORT } from "./Configs/config";
 import { initializeWebSocket } from "./services/monitorService";
 
-const { startNgrok } = require("./Controllers/ngrokController");
+// const { startNgrok } = require("./Controllers/ngrokController");
 dotenv.config();
 
 async function main() {
@@ -18,13 +18,14 @@ async function main() {
   app.use(express.json());
   app.use(routes);
 
-  startNgrok(PORT)
-    .then((ngrokUrl: string) => {
-      initializeWebSocket(SYMBOL, STREAM_URL, ASSET);
+  // startNgrok(PORT)
+  //   .then((ngrokUrl: string) => {
+  //     initializeWebSocket(SYMBOL, STREAM_URL, ASSET);
 
       // Inicia o servidor Express
       app.listen(PORT, async () => {
-        console.log(`🚀Server is running on port ${PORT}`);
+        initializeWebSocket(SYMBOL, STREAM_URL, ASSET);
+        console.log(SUCCESS.APP.SERVEROK);
         try {
           await prisma.$connect();
           console.log(SUCCESS.DATABASE.HASCONECTIONOK);
@@ -40,10 +41,10 @@ async function main() {
           console.log(ERRORS.DATABASE.SEQERROR);
         }
       });
-    })
-    .catch((err: any) => {
-      console.error("Error starting Ngrok:", err);
-    });
+    // })
+    // .catch((err: any) => {
+    //   console.error("Error starting Ngrok:", err);
+    // });
 }
 
 main().catch(async (e) => {

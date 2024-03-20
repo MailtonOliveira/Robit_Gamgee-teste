@@ -1,0 +1,14 @@
+// schema.prisma
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Order {
+  id         String   @id @unique @default(auto()) @map("_id")
+  symbol     String
+  quantity   Float
+  price      Float
+  executedAt DateTime @default(now())
+}

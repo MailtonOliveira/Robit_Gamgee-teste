@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
 import routes from "./routes";
-import { SYMBOL, STREAM_URL, PROFIT, BUY_QTY, ASSET, PORT } from "./Configs/config";
+import { SYMBOL, STREAM_URL, ASSET, PORT } from "./Configs/config";
 import { initializeWebSocket } from "./services/monitorService";
 
 

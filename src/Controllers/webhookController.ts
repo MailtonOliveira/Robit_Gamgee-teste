@@ -2,8 +2,8 @@ import { NextFunction, Request, Response } from "express"; // Importe as defini�
 import { buy, sell } from "./orderController"; // Importe as funções de compra e venda
 import { getBalance } from "../Controllers/balanceController";
 import { updateBalancesMessage, buyOrderMessage, sellOrderMessage } from "../services/messagesService";
-import dotenv from "dotenv";
-dotenv.config();
+import { config } from 'dotenv';
+config();
 
 let buyExecuted = false;
 let sellExecuted = false;

@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express"; // Importe as definições de Request e Response
 import { buy, sell } from "./orderController"; // Importe as funções de compra e venda
 import { getBalance } from "../Controllers/balanceController";
-import { buyOrderMessage, sellOrderMessage } from "../services/messagesService";
+import { updateBalancesMessage, buyOrderMessage, sellOrderMessage } from "../services/messagesService";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -16,22 +16,24 @@ export class TradingViewWebhook {
       const alertData = req.body;
       console.log(alertData);
 
-      if (buyExecuted && alertData.condition === "BUY") {
+      if (buyExecuted && alertData.condition === "buy") {
         res.status(400).send("Buy Order already executed");
+        console.log("Buy Order already executed")
         return;
-      } else if (sellExecuted && alertData.condition === "SELL") {
+      } else if (sellExecuted && alertData.condition === "sell") {
         res.status(400).send("Sell Order already executed");
+        console.log("Sell Order already executed")
         return;
       }
 
   
       let order;
-      if (alertData.condition === "BUY") {
+      if (alertData.condition === "buy") {
         const order = await buyOrder(alertData.symbol, alertData.quantity);
         res.status(200).send(order);
         buyExecuted = true;
         sellExecuted = false;
-      } else if (alertData.condition === "SELL") {
+      } else if (alertData.condition === "sell") {
         const order = await sellOrder(alertData.symbol, alertData.quantity);
         res.status(200).send(order);
         sellExecuted = true;
@@ -54,17 +56,14 @@ async function updateBalances(ASSET: string,) {
   const usdtBalance = balances.find((balance: { asset: string }) => balance.asset === "USDT");
   const availableBalance = parseFloat(usdtBalance?.free ?? "0");
   const virtualBalance = availableBalance;
-  let message = `Real Balance ${asset}: ${availableBalance}\n`;
-  message += `Virtual Balance ${asset}: ${virtualBalance}\n`;
+  console.log(updateBalancesMessage(asset, availableBalance, virtualBalance));
 
   if (buyExecuted) {
     const solBalance = balances.find((balance: { asset: string }) => balance.asset === ASSET);
     const solAvailableBalance = parseFloat(solBalance?.free ?? "0");
     const solvirtualBalance = solAvailableBalance;
-    console.log(`Real Balance SOL: ${solAvailableBalance}`);
-    console.log(`Virtual Balance SOL: ${solvirtualBalance}`);
+    console.log(updateBalancesMessage('SOL', solAvailableBalance, solvirtualBalance));
   }
-  console.log(message);
 }
 
 async function buyOrder(symbol: string, quantity: number) {

@@ -1,4 +1,6 @@
-// schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
 
 datasource db {
   provider = "mongodb"
@@ -6,9 +8,10 @@ datasource db {
 }
 
 model Order {
-  id         String   @id @unique @default(auto()) @map("_id")
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
   symbol     String
-  quantity   Float
-  price      Float
+  quantity   String
+  price      String
+  type       String
   executedAt DateTime @default(now())
 }

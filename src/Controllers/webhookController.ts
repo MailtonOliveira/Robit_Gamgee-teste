@@ -1,8 +1,13 @@
 import { NextFunction, Request, Response } from "express"; // Importe as definições de Request e Response
 import { buy, sell } from "./orderController"; // Importe as funções de compra e venda
 import { getBalance } from "../Controllers/balanceController";
-import { updateBalancesMessage, buyOrderMessage, sellOrderMessage } from "../services/messagesService";
-import { config } from 'dotenv';
+import prisma from "../database/prismaCliente";
+import {
+  updateBalancesMessage,
+  buyOrderMessage,
+  sellOrderMessage,
+} from "../services/messagesService";
+import { config } from "dotenv";
 config();
 
 let buyExecuted = false;
@@ -18,15 +23,14 @@ export class TradingViewWebhook {
 
       if (buyExecuted && alertData.condition === "buy") {
         res.status(400).send("Buy Order already executed");
-        console.log("Buy Order already executed")
+        console.log("Buy Order already executed");
         return;
       } else if (sellExecuted && alertData.condition === "sell") {
         res.status(400).send("Sell Order already executed");
-        console.log("Sell Order already executed")
+        console.log("Sell Order already executed");
         return;
       }
 
-  
       let order;
       if (alertData.condition === "buy") {
         const order = await buyOrder(alertData.symbol, alertData.quantity);
@@ -39,30 +43,37 @@ export class TradingViewWebhook {
         sellExecuted = true;
         buyExecuted = false;
       } else {
-        res.status(400).send("Invalid alert condition or order already executed");
+        res
+          .status(400)
+          .send("Invalid alert condition or order already executed");
         return;
       }
 
       await updateBalances(alertData.symbol);
-
     } catch (error) {
       return next(error);
     }
   }
 }
 
-async function updateBalances(ASSET: string,) {
+async function updateBalances(ASSET: string) {
   const balances = await getBalance();
-  const usdtBalance = balances.find((balance: { asset: string }) => balance.asset === "USDT");
+  const usdtBalance = balances.find(
+    (balance: { asset: string }) => balance.asset === "USDT"
+  );
   const availableBalance = parseFloat(usdtBalance?.free ?? "0");
   const virtualBalance = availableBalance;
   console.log(updateBalancesMessage(asset, availableBalance, virtualBalance));
 
   if (buyExecuted) {
-    const solBalance = balances.find((balance: { asset: string }) => balance.asset === ASSET);
+    const solBalance = balances.find(
+      (balance: { asset: string }) => balance.asset === ASSET
+    );
     const solAvailableBalance = parseFloat(solBalance?.free ?? "0");
     const solvirtualBalance = solAvailableBalance;
-    console.log(updateBalancesMessage('SOL', solAvailableBalance, solvirtualBalance));
+    console.log(
+      updateBalancesMessage("SOL", solAvailableBalance, solvirtualBalance)
+    );
   }
 }
 
@@ -73,8 +84,16 @@ async function buyOrder(symbol: string, quantity: number) {
     process.exit(1);
   }
   console.log(buyOrderMessage(symbol, order.executedQty, order.fills[0].price));
-  // console.log(`Compra realizada: ${order.executedQty} ${symbol} por ${order.fills[0].price}`);
-  // console.log(`Notional: ${order.executedQty * parseFloat(order.fills[0].price)}`);
+
+  await prisma.order.create({
+    data: {
+      symbol,
+      quantity: order.executedQty,
+      price: order.fills[0].price,
+      type: "BUY",
+    },
+  });
+
   return order;
 }
 
@@ -84,7 +103,17 @@ async function sellOrder(symbol: string, quantity: number) {
     console.log(order);
     process.exit(1);
   }
-  console.log(sellOrderMessage(symbol, order.executedQty, order.fills[0].price));
-  // console.log(`Venda realizada: ${order.executedQty} ${symbol} por ${order.fills[0].price}`);
+  console.log(
+    sellOrderMessage(symbol, order.executedQty, order.fills[0].price)
+  );
+  await prisma.order.create({
+    data: {
+      symbol,
+      quantity: order.executedQty,
+      price: order.fills[0].price,
+      type: 'SELL',
+    },
+  });
+  
   return order;
 }

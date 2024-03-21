@@ -23,7 +23,7 @@ export class TradingViewWebhook {
       const alertData = req.body;
       console.log(alertData);
 
-      const availableBalance = await updateBalances();
+      const availableBalance: number = await updateBalances();
 
       if (buyExecuted && alertData.condition === "buy") {
         res.status(400).send("Buy Order already executed");

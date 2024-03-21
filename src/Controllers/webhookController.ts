@@ -15,11 +15,15 @@ let sellExecuted = false;
 
 const asset = process.env.ASSET!;
 
+updateBalances();
+
 export class TradingViewWebhook {
   async viewWebhook(req: Request, res: Response, next: NextFunction) {
     try {
       const alertData = req.body;
       console.log(alertData);
+
+      const availableBalance = await updateBalances();
 
       if (buyExecuted && alertData.condition === "buy") {
         res.status(400).send("Buy Order already executed");
@@ -31,14 +35,13 @@ export class TradingViewWebhook {
         return;
       }
 
-      let order;
       if (alertData.condition === "buy") {
         const order = await buyOrder(alertData.symbol, alertData.quantity);
         res.status(200).send(order);
         buyExecuted = true;
         sellExecuted = false;
       } else if (alertData.condition === "sell") {
-        const order = await sellOrder(alertData.symbol, alertData.quantity);
+        const order = await sellOrder(alertData.symbol, alertData.quantity, availableBalance.toString());
         res.status(200).send(order);
         sellExecuted = true;
         buyExecuted = false;
@@ -49,14 +52,14 @@ export class TradingViewWebhook {
         return;
       }
 
-      await updateBalances(alertData.symbol);
+      await updateBalances();
     } catch (error) {
       return next(error);
     }
   }
 }
 
-async function updateBalances(ASSET: string) {
+async function updateBalances() {
   const balances = await getBalance();
   const usdtBalance = balances.find(
     (balance: { asset: string }) => balance.asset === "USDT"
@@ -67,7 +70,7 @@ async function updateBalances(ASSET: string) {
 
   if (buyExecuted) {
     const solBalance = balances.find(
-      (balance: { asset: string }) => balance.asset === ASSET
+      (balance: { asset: string }) => balance.asset === "SOL"
     );
     const solAvailableBalance = parseFloat(solBalance?.free ?? "0");
     const solvirtualBalance = solAvailableBalance;
@@ -75,8 +78,9 @@ async function updateBalances(ASSET: string) {
       updateBalancesMessage("SOL", solAvailableBalance, solvirtualBalance)
     );
   }
+  return availableBalance;
+  
 }
-
 async function buyOrder(symbol: string, quantity: number) {
   const order = await buy(symbol, quantity);
   if (order.status !== "FILLED") {
@@ -97,7 +101,7 @@ async function buyOrder(symbol: string, quantity: number) {
   return order;
 }
 
-async function sellOrder(symbol: string, quantity: number) {
+async function sellOrder(symbol: string, quantity: number, availableBalance?: string  | null) {
   const order = await sell(symbol, quantity);
   if (order.status !== "FILLED") {
     console.log(order);
@@ -106,14 +110,19 @@ async function sellOrder(symbol: string, quantity: number) {
   console.log(
     sellOrderMessage(symbol, order.executedQty, order.fills[0].price)
   );
+  const data = {
+    symbol,
+    quantity: order.executedQty,
+    price: order.fills[0].price,
+    type: "BUY",
+    availableBalance: availableBalance // Salva o saldo disponível
+  };
+
+  console.log("Data to be saved:", data); // Adicione esta linha para imprimir o objeto data
+
   await prisma.order.create({
-    data: {
-      symbol,
-      quantity: order.executedQty,
-      price: order.fills[0].price,
-      type: 'SELL',
-    },
+    data: data,
   });
-  
+  console.log(sellOrder)
   return order;
 }

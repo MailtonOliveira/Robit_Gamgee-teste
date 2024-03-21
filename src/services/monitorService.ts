@@ -20,8 +20,6 @@ export function initializeWebSocket(
 
   ws.onmessage = handleMessageEvent;
 
-  updateBalances();
-
   setInterval(updateBalances, 300000);
 
   function handleWebSocketError(err: any) {

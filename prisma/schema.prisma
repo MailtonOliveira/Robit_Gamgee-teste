@@ -8,10 +8,11 @@ datasource db {
 }
 
 model Order {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  symbol     String
-  quantity   String
-  price      String
-  type       String
-  executedAt DateTime @default(now())
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  symbol           String
+  quantity         String
+  price            String
+  type             String
+  availableBalance String?
+  executedAt       DateTime @default(now())
 }

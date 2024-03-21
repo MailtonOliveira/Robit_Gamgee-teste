@@ -123,7 +123,7 @@ async function sellOrder(
       symbol,
       quantity: order.executedQty,
       price: order.fills[0].price,
-      type: "BUY",
+      type: "sell",
       availableBalance: availableBalance,
     },
   });

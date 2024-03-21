@@ -41,7 +41,11 @@ export class TradingViewWebhook {
         buyExecuted = true;
         sellExecuted = false;
       } else if (alertData.condition === "sell") {
-        const order = await sellOrder(alertData.symbol, alertData.quantity, availableBalance.toString());
+        const order = await sellOrder(
+          alertData.symbol,
+          alertData.quantity,
+          availableBalance.toString()
+        );
         res.status(200).send(order);
         sellExecuted = true;
         buyExecuted = false;
@@ -79,7 +83,6 @@ async function updateBalances() {
     );
   }
   return availableBalance;
-  
 }
 async function buyOrder(symbol: string, quantity: number) {
   const order = await buy(symbol, quantity);
@@ -101,7 +104,11 @@ async function buyOrder(symbol: string, quantity: number) {
   return order;
 }
 
-async function sellOrder(symbol: string, quantity: number, availableBalance?: string  | null) {
+async function sellOrder(
+  symbol: string,
+  quantity: number,
+  availableBalance?: string | null
+) {
   const order = await sell(symbol, quantity);
   if (order.status !== "FILLED") {
     console.log(order);
@@ -110,19 +117,16 @@ async function sellOrder(symbol: string, quantity: number, availableBalance?: st
   console.log(
     sellOrderMessage(symbol, order.executedQty, order.fills[0].price)
   );
-  const data = {
-    symbol,
-    quantity: order.executedQty,
-    price: order.fills[0].price,
-    type: "BUY",
-    availableBalance: availableBalance // Salva o saldo disponível
-  };
-
-  console.log("Data to be saved:", data); // Adicione esta linha para imprimir o objeto data
 
   await prisma.order.create({
-    data: data,
+    data: {
+      symbol,
+      quantity: order.executedQty,
+      price: order.fills[0].price,
+      type: "BUY",
+      availableBalance: availableBalance,
+    },
   });
-  console.log(sellOrder)
+
   return order;
 }

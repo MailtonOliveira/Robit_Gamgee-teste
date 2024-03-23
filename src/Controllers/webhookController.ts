@@ -109,11 +109,21 @@ async function sellOrder(
   quantity: number,
   availableBalance?: string | null
 ) {
-  const order = await sell(symbol, quantity);
+  const balances = await getBalance();
+  const solBalance = balances.find((balance: { asset: string }) => balance.asset === symbol);
+  if (!solBalance) {
+    console.error(`Failed to find balance for ${symbol}`);
+    process.exit(1);
+  }
+
+  const availableQuantity = parseFloat(solBalance.free);
+  const orderQuantity = Math.floor(availableQuantity); // Arredonda para baixo para garantir que a quantidade vendida seja um número inteiro
+
+  const order = await sell(symbol, orderQuantity);
   if (order.status !== "FILLED") {
     console.log(order);
     process.exit(1);
-  }
+    }
   console.log(
     sellOrderMessage(symbol, order.executedQty, order.fills[0].price)
   );

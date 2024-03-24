@@ -36,14 +36,14 @@ export class TradingViewWebhook {
       }
 
       if (alertData.condition === "buy") {
-        const order = await buyOrder(alertData.symbol, alertData.quantity);
+        const order = await buyOrder(alertData.symbol);
         res.status(200).send(order);
         buyExecuted = true;
         sellExecuted = false;
       } else if (alertData.condition === "sell") {
         const order = await sellOrder(
           alertData.symbol,
-          alertData.quantity,
+          
           availableBalance.toString()
         );
         res.status(200).send(order);
@@ -84,8 +84,9 @@ async function updateBalances() {
   }
   return availableBalance;
 }
-async function buyOrder(symbol: string, quantity: number) {
-  const order = await buy(symbol, quantity);
+async function buyOrder(symbol: string) {
+  const orderQuantity = 1;
+  const order = await buy(symbol, orderQuantity);
   if (order.status !== "FILLED") {
     console.log(order);
     process.exit(1);
@@ -104,11 +105,7 @@ async function buyOrder(symbol: string, quantity: number) {
   return order;
 }
 
-async function sellOrder(
-  symbol: string,
-  quantity: number,
-  availableBalance?: string | null
-) {
+async function sellOrder(symbol: string, availableBalance?: string | null) {
   const balances = await getBalance();
   const solBalance = balances.find((balance: { asset: string }) => balance.asset === symbol);
   if (!solBalance) {
@@ -119,11 +116,16 @@ async function sellOrder(
   const availableQuantity = parseFloat(solBalance.free);
   const orderQuantity = Math.floor(availableQuantity); // Arredonda para baixo para garantir que a quantidade vendida seja um número inteiro
 
+  if (orderQuantity <= 0) {
+    console.error("Insufficient balance for selling.");
+    return; // Retorna sem enviar a ordem de venda
+  }
+
   const order = await sell(symbol, orderQuantity);
   if (order.status !== "FILLED") {
     console.log(order);
     process.exit(1);
-    }
+  }
   console.log(
     sellOrderMessage(symbol, order.executedQty, order.fills[0].price)
   );

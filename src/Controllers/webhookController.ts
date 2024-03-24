@@ -114,14 +114,9 @@ async function sellOrder(symbol: string, availableBalance?: string | null) {
   }
 
   const availableQuantity = parseFloat(solBalance.free);
-  const orderQuantity = Math.floor(availableQuantity); // Arredonda para baixo para garantir que a quantidade vendida seja um número inteiro
+ 
 
-  if (orderQuantity <= 0) {
-    console.error("Insufficient balance for selling.");
-    return; // Retorna sem enviar a ordem de venda
-  }
-
-  const order = await sell(symbol, orderQuantity);
+  const order = await sell(symbol, availableQuantity);
   if (order.status !== "FILLED") {
     console.log(order);
     process.exit(1);

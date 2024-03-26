@@ -19,8 +19,6 @@ export function initializeWebSocket(
 
   ws.on("error", handleWebSocketError);
 
-  updateBalances();
-
   ws.onmessage = handleMessageEvent;
 
   function handleWebSocketError(err: any) {

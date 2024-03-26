@@ -4,9 +4,6 @@ import { updateBalancesMessage } from "./messagesService";
 import { config } from "dotenv";
 config();
 
-
-
-
 export function initializeWebSocket(
   SYMBOL: string,
   STREAM_URL: string,
@@ -16,6 +13,8 @@ export function initializeWebSocket(
   const ws: WebSocket = new WebSocket(
     `${STREAM_URL}/${SYMBOL?.toLowerCase()}@bookTicker`
   );
+  
+  updateBalances()
 
   ws.on("error", handleWebSocketError);
 

@@ -9,9 +9,8 @@ export function initializeWebSocket(
   STREAM_URL: string,
   ASSET: string,
   SYM: string
-)
-
-{updateBalances()
+) {
+  updateBalances();
   const ws: WebSocket = new WebSocket(
     `${STREAM_URL}/${SYMBOL?.toLowerCase()}@bookTicker`
   );
@@ -37,8 +36,6 @@ export function initializeWebSocket(
     );
     const solAvailableBalance = parseFloat(solBalance?.free ?? "0");
     console.log(updateBalancesMessage(SYM, solAvailableBalance));
-
-    return availableBalance;
   }
 
   async function handleMessageEvent(event: WebSocket.MessageEvent) {

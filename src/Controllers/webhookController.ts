@@ -1,5 +1,5 @@
-import { NextFunction, Request, Response } from "express"; // Importe as definições de Request e Response
-import { buy, sell } from "./orderController"; // Importe as funções de compra e venda
+import { NextFunction, Request, Response } from "express";
+import { buy, sell } from "./orderController";
 import { getBalance } from "../Controllers/balanceController";
 import prisma from "../database/prismaCliente";
 import {
@@ -15,7 +15,7 @@ let sellExecuted = false;
 
 const asset = process.env.ASSET!;
 
-updateBalances();
+
 
 export class TradingViewWebhook {
   async viewWebhook(req: Request, res: Response, next: NextFunction) {
@@ -43,7 +43,7 @@ export class TradingViewWebhook {
       } else if (alertData.condition === "sell") {
         const order = await sellOrder(
           alertData.symbol,
-          
+
           availableBalance.toString()
         );
         res.status(200).send(order);
@@ -69,17 +69,15 @@ async function updateBalances() {
     (balance: { asset: string }) => balance.asset === "USDT"
   );
   const availableBalance = parseFloat(usdtBalance?.free ?? "0");
-  const virtualBalance = availableBalance;
-  console.log(updateBalancesMessage(asset, availableBalance, virtualBalance));
+  console.log(updateBalancesMessage(asset, availableBalance));
 
   if (buyExecuted) {
     const solBalance = balances.find(
       (balance: { asset: string }) => balance.asset === "SOL"
     );
     const solAvailableBalance = parseFloat(solBalance?.free ?? "0");
-    const solvirtualBalance = solAvailableBalance;
     console.log(
-      updateBalancesMessage("SOL", solAvailableBalance, solvirtualBalance)
+      updateBalancesMessage("SOL", solAvailableBalance)
     );
   }
   return availableBalance;
@@ -107,14 +105,15 @@ async function buyOrder(symbol: string) {
 
 async function sellOrder(symbol: string, availableBalance?: string | null) {
   const balances = await getBalance();
-  const solBalance = balances.find((balance: { asset: string }) => balance.asset === symbol);
+  const solBalance = balances.find(
+    (balance: { asset: string }) => balance.asset === symbol
+  );
   if (!solBalance) {
     console.error(`Failed to find balance for ${symbol}`);
     process.exit(1);
   }
 
   const availableQuantity = parseFloat(solBalance.free);
- 
 
   const order = await sell(symbol, availableQuantity);
   if (order.status !== "FILLED") {

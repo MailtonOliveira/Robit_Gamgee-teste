@@ -22,8 +22,7 @@ export const sellOrderMessage = (
 
 export const updateBalancesMessage = (
   asset: string,
-  availableBalance: number,
-  virtualBalance: number
+  availableBalance: number
 ) => {
-  return `Atualização de saldos - Ativo: ${asset}, Saldo disponível: ${availableBalance}, Saldo virtual: ${virtualBalance} Horário [${getCurrentDateTime()}]`;
+  return `Atualização de saldos - Ativo: ${asset}, Saldo disponível: ${availableBalance}, Horário [${getCurrentDateTime()}]`;
 };

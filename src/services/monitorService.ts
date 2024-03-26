@@ -1,6 +1,11 @@
 import WebSocket from "ws";
 import { getBalance } from "../Controllers/balanceController";
 import { updateBalancesMessage } from "./messagesService";
+import { config } from "dotenv";
+config();
+
+
+
 
 export function initializeWebSocket(
   SYMBOL: string,
@@ -13,28 +18,29 @@ export function initializeWebSocket(
 
   ws.on("error", handleWebSocketError);
 
-  let availableBalance = 0;
-  let virtualBalance = 0;
-
-  const sales: any[] = [];
+  updateBalances();
 
   ws.onmessage = handleMessageEvent;
-
-  // setInterval(updateBalances, 300000);
 
   function handleWebSocketError(err: any) {
     console.error(err);
     process.exit(1);
   }
-
   async function updateBalances() {
     const balances = await getBalance();
     const usdtBalance = balances.find(
       (balance: { asset: string }) => balance.asset === ASSET
     );
-    availableBalance = parseFloat(usdtBalance?.free ?? "0");
-    virtualBalance = availableBalance;
-    console.log(updateBalancesMessage(ASSET, availableBalance, virtualBalance));
+    const availableBalance = parseFloat(usdtBalance?.free ?? "0");
+    console.log(updateBalancesMessage(ASSET, availableBalance));
+
+    const solBalance = balances.find(
+      (balance: { asset: string }) => balance.asset === SYMBOL
+    );
+    const solAvailableBalance = parseFloat(solBalance?.free ?? "0");
+    console.log(updateBalancesMessage(SYMBOL, solAvailableBalance));
+
+    return availableBalance;
   }
 
   async function handleMessageEvent(event: WebSocket.MessageEvent) {
@@ -52,4 +58,5 @@ export function initializeWebSocket(
       process.exit(1);
     }
   }
+  return { updateBalances };
 }

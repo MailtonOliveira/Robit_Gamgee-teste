@@ -9,12 +9,12 @@ export function initializeWebSocket(
   STREAM_URL: string,
   ASSET: string,
   SYM: string
-) {
+)
+
+{updateBalances()
   const ws: WebSocket = new WebSocket(
     `${STREAM_URL}/${SYMBOL?.toLowerCase()}@bookTicker`
   );
-  
-  updateBalances()
 
   ws.on("error", handleWebSocketError);
 

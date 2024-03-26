@@ -10,7 +10,8 @@ config();
 export function initializeWebSocket(
   SYMBOL: string,
   STREAM_URL: string,
-  ASSET: string
+  ASSET: string,
+  SYM: string
 ) {
   const ws: WebSocket = new WebSocket(
     `${STREAM_URL}/${SYMBOL?.toLowerCase()}@bookTicker`
@@ -35,10 +36,10 @@ export function initializeWebSocket(
     console.log(updateBalancesMessage(ASSET, availableBalance));
 
     const solBalance = balances.find(
-      (balance: { asset: string }) => balance.asset === SYMBOL
+      (balance: { asset: string }) => balance.asset === SYM
     );
     const solAvailableBalance = parseFloat(solBalance?.free ?? "0");
-    console.log(updateBalancesMessage(SYMBOL, solAvailableBalance));
+    console.log(updateBalancesMessage(SYM, solAvailableBalance));
 
     return availableBalance;
   }

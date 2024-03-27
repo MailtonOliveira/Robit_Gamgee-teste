@@ -4,7 +4,7 @@ function getCurrentDateTime(): string {
   return moment().tz("America/Sao_Paulo").format("YYYY-MM-DD HH:mm:ss");
 }
 
-export const buyOrderMessage = (
+export const buyMessage = (
   symbol: string,
   executedQty: number,
   price: number
@@ -12,7 +12,7 @@ export const buyOrderMessage = (
   return `Compra realizada: ${executedQty} ${symbol} por ${price} Horário [${getCurrentDateTime()}]`;
 };
 
-export const sellOrderMessage = (
+export const sellMessage = (
   symbol: string,
   executedQty: number,
   price: number
@@ -20,7 +20,7 @@ export const sellOrderMessage = (
   return `Venda realizada: ${executedQty} ${symbol} por ${price}`;
 };
 
-export const updateBalancesMessage = (
+export const updateMessage = (
   asset: string,
   availableBalance: number
 ) => {

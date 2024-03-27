@@ -7,7 +7,7 @@ import { ERRORS } from "./constants/errors";
 import { SUCCESS } from "./constants/success";
 import { Request, Response } from "express";
 import { SYMBOL, STREAM_URL, ASSET, PORT, SYM } from "./Configs/config";
-import { initializeWebSocket } from "./services/monitorService";
+import { WebSocketInitializer } from "./services/monitorService";
 
 const { startNgrok } = require("./Controllers/ngrokController");
 dotenv.config();
@@ -20,11 +20,10 @@ async function main() {
 
   startNgrok(PORT)
     .then((ngrokUrl: string) => {
-      initializeWebSocket(SYMBOL, STREAM_URL, ASSET, SYM);
+      const wsInitializer = new WebSocketInitializer (SYMBOL, STREAM_URL, ASSET, SYM);
 
       // Inicia o servidor Express
       app.listen(PORT, async () => {
-        initializeWebSocket(SYMBOL, STREAM_URL, ASSET, SYM);
         console.log(SUCCESS.APP.SERVEROK);
         try {
           await prisma.$connect();

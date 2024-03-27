@@ -1,29 +1,19 @@
 import { NextFunction, Request, Response } from "express";
 import { buy, sell } from "./orderController";
 import { getBalance } from "../Controllers/balanceController";
+import { WebSocketInitializer } from "../services/monitorService";
 import prisma from "../database/prismaCliente";
-import {
-  updateBalancesMessage,
-  buyOrderMessage,
-  sellOrderMessage,
-} from "../services/messagesService";
-import { config } from "dotenv";
-config();
+import { updateMessage,buyMessage,sellMessage } from "../services/messagesService";
+import { SYMBOL, STREAM_URL, ASSET, SYM } from "../Configs/config";
 
 let buyExecuted = false;
 let sellExecuted = false;
-
-const asset = process.env.ASSET!;
-
-
-
 export class TradingViewWebhook {
   async viewWebhook(req: Request, res: Response, next: NextFunction) {
     try {
       const alertData = req.body;
       console.log(alertData);
 
-      const availableBalance: number = await updateBalances();
 
       if (buyExecuted && alertData.condition === "buy") {
         res.status(400).send("Buy Order already executed");
@@ -44,7 +34,6 @@ export class TradingViewWebhook {
         const order = await sellOrder(
           alertData.symbol,
 
-          availableBalance.toString()
         );
         res.status(200).send(order);
         sellExecuted = true;
@@ -55,33 +44,20 @@ export class TradingViewWebhook {
           .send("Invalid alert condition or order already executed");
         return;
       }
+      const wsInitializer = new WebSocketInitializer(SYMBOL, STREAM_URL, ASSET, SYM);
+      await wsInitializer.updateBalances();
+      //let availableBalance = wsInitializer.updateBalances;
+      
 
-      await updateBalances();
+  
     } catch (error) {
       return next(error);
     }
   }
 }
 
-async function updateBalances() {
-  const balances = await getBalance();
-  const usdtBalance = balances.find(
-    (balance: { asset: string }) => balance.asset === "USDT"
-  );
-  const availableBalance = parseFloat(usdtBalance?.free ?? "0");
-  console.log(updateBalancesMessage(asset, availableBalance));
 
-  if (buyExecuted) {
-    const solBalance = balances.find(
-      (balance: { asset: string }) => balance.asset === "SOL"
-    );
-    const solAvailableBalance = parseFloat(solBalance?.free ?? "0");
-    console.log(
-      updateBalancesMessage("SOL", solAvailableBalance)
-    );
-  }
-  return availableBalance;
-}
+
 async function buyOrder(symbol: string) {
   const orderQuantity = 1;
   const order = await buy(symbol, orderQuantity);
@@ -89,7 +65,7 @@ async function buyOrder(symbol: string) {
     console.log(order);
     process.exit(1);
   }
-  console.log(buyOrderMessage(symbol, order.executedQty, order.fills[0].price));
+  console.log(buyMessage(symbol, order.executedQty, order.fills[0].price));
 
   await prisma.order.create({
     data: {
@@ -121,7 +97,7 @@ async function sellOrder(symbol: string, availableBalance?: string | null) {
     process.exit(1);
   }
   console.log(
-    sellOrderMessage(symbol, order.executedQty, order.fills[0].price)
+    sellMessage(symbol, order.executedQty, order.fills[0].price)
   );
 
   await prisma.order.create({
@@ -130,7 +106,7 @@ async function sellOrder(symbol: string, availableBalance?: string | null) {
       quantity: order.executedQty,
       price: order.fills[0].price,
       type: "sell",
-      availableBalance: availableBalance,
+      availableBalance: solBalance ? JSON.stringify(solBalance) : null,
     },
   });
 

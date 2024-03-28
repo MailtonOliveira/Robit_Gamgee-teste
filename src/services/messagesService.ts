@@ -9,7 +9,7 @@ export const buyMessage = (
   executedQty: number,
   price: number
 ) => {
-  return `Compra realizada: ${executedQty} ${symbol} por ${price} Horário [${getCurrentDateTime()}]`;
+  return `Compra realizada: ${executedQty} ${symbol} por ${price}, Horário [${getCurrentDateTime()}]`;
 };
 
 export const sellMessage = (
@@ -17,7 +17,7 @@ export const sellMessage = (
   executedQty: number,
   price: number
 ) => {
-  return `Venda realizada: ${executedQty} ${symbol} por ${price}`;
+  return `Venda realizada: ${executedQty} ${symbol} por ${price}, Horário [${getCurrentDateTime()}]`;
 };
 
 export const updateMessage = (

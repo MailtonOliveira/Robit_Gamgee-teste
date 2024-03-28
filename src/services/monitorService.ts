@@ -39,7 +39,7 @@ export class WebSocketInitializer {
     );
     const solAvailableBalance = parseFloat(solBalance?.free ?? "0");
     console.log(updateMessage(this.SYM, solAvailableBalance));
-    return availableBalance;
+    return { availableBalance, solAvailableBalance };
   }
 
   async handleMessageEvent(event: WebSocket.MessageEvent) {

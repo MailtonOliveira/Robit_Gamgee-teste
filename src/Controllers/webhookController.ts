@@ -3,7 +3,11 @@ import { buy, sell } from "./orderController";
 import { getBalance } from "../Controllers/balanceController";
 import { WebSocketInitializer } from "../services/monitorService";
 import prisma from "../database/prismaCliente";
-import { updateMessage,buyMessage,sellMessage } from "../services/messagesService";
+import {
+  updateMessage,
+  buyMessage,
+  sellMessage,
+} from "../services/messagesService";
 import { SYMBOL, STREAM_URL, ASSET, SYM } from "../Configs/config";
 
 let buyExecuted = false;
@@ -14,6 +18,10 @@ export class TradingViewWebhook {
       const alertData = req.body;
       console.log(alertData);
 
+      let wsInitializer: WebSocketInitializer | undefined;
+      let availableBalance: number | undefined;
+    
+      console.log("Available Balance:", availableBalance);
 
       if (buyExecuted && alertData.condition === "buy") {
         res.status(400).send("Buy Order already executed");
@@ -31,32 +39,37 @@ export class TradingViewWebhook {
         buyExecuted = true;
         sellExecuted = false;
       } else if (alertData.condition === "sell") {
-        const order = await sellOrder(
-          alertData.symbol,
-
+        const order = await sellOrder(alertData.symbol);
+        wsInitializer = new WebSocketInitializer(
+          SYMBOL,
+          STREAM_URL,
+          ASSET,
+          SYM
         );
+        
+
         res.status(200).send(order);
         sellExecuted = true;
         buyExecuted = false;
+
+        const result = await wsInitializer.updateBalances();
+        availableBalance = result.availableBalance;
+
+        if (availableBalance !== undefined) {
+          console.log("Available Balance:", availableBalance);
+        } else {
+          console.log("Available Balance is undefined");
+        }
       } else {
         res
           .status(400)
           .send("Invalid alert condition or order already executed");
-        return;
       }
-      const wsInitializer = new WebSocketInitializer(SYMBOL, STREAM_URL, ASSET, SYM);
-      await wsInitializer.updateBalances();
-      //let availableBalance = wsInitializer.updateBalances;
-      
-
-  
     } catch (error) {
       return next(error);
     }
   }
 }
-
-
 
 async function buyOrder(symbol: string) {
   const orderQuantity = 1;
@@ -79,11 +92,12 @@ async function buyOrder(symbol: string) {
   return order;
 }
 
-async function sellOrder(symbol: string, availableBalance?: string | null) {
+async function sellOrder(symbol: string, availableBalance?: number) {
   const balances = await getBalance();
   const solBalance = balances.find(
     (balance: { asset: string }) => balance.asset === symbol
   );
+
   if (!solBalance) {
     console.error(`Failed to find balance for ${symbol}`);
     process.exit(1);
@@ -96,19 +110,20 @@ async function sellOrder(symbol: string, availableBalance?: string | null) {
     console.log(order);
     process.exit(1);
   }
-  console.log(
-    sellMessage(symbol, order.executedQty, order.fills[0].price)
-  );
+  console.log(sellMessage(symbol, order.executedQty, order.fills[0].price));
 
-  await prisma.order.create({
+  console.log("Available Balance:", availableBalance);
+
+  const dbOrder = await prisma.order.create({
     data: {
       symbol,
       quantity: order.executedQty,
       price: order.fills[0].price,
       type: "sell",
-      availableBalance: solBalance ? JSON.stringify(solBalance) : null,
+      usdtQuantity: availableBalance,
     },
   });
+  console.log("Dados do pedido criado no banco de dados:", dbOrder);
 
   return order;
 }

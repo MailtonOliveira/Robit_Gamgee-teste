@@ -97,7 +97,15 @@ async function sellOrder(symbol: string) {
     process.exit(1);
   }
 
-  const availableQuantity = parseFloat(solBalance.free);
+  let availableQuantity = parseFloat(solBalance.free);
+
+  const lotSize = 0.001;
+  availableQuantity = Math.floor(availableQuantity / lotSize) * lotSize;
+
+  if (availableQuantity <= 0) {
+    console.error(`Insufficient balance for ${symbol}`);
+    process.exit(1);
+  }
 
   const order = await sell(symbol, availableQuantity);
   if (order.status !== "FILLED") {

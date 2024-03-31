@@ -20,7 +20,7 @@ async function main() {
 
   startNgrok(PORT)
     .then((ngrokUrl: string) => {
-      const wsInitializer = new WebSocketInitializer (SYMBOL, STREAM_URL, ASSET);
+      const wsInitializer = new WebSocketInitializer (SYMBOL, STREAM_URL, ASSET, SYM);
 
       // Inicia o servidor Express
       app.listen(PORT, async () => {

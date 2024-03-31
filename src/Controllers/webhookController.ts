@@ -4,7 +4,7 @@ import { getBalance } from "../Controllers/balanceController";
 import { WebSocketInitializer } from "../services/monitorService";
 import prisma from "../database/prismaCliente";
 import { buyMessage, sellMessage } from "../services/messagesService";
-import { SYMBOL, STREAM_URL, ASSET, BUY_QTY } from "../Configs/config";
+import { SYMBOL, STREAM_URL, ASSET, SYM, BUY_QTY } from "../Configs/config";
 
 let buyExecuted = false;
 let sellExecuted = false;
@@ -55,7 +55,7 @@ async function buyOrder(symbol: string) {
   }
   console.log(buyMessage(symbol, order.executedQty, order.fills[0].price));
 
-  wsInitializer = new WebSocketInitializer(SYMBOL, STREAM_URL, ASSET);
+  wsInitializer = new WebSocketInitializer(SYMBOL, STREAM_URL, ASSET, SYM);
 
   const result = await wsInitializer.updateBalances();
   const availableBalance = result.availableBalance;
@@ -101,7 +101,7 @@ async function sellOrder(symbol: string, res: Response) {
   }
   console.log(sellMessage(symbol, order.executedQty, order.fills[0].price));
 
-  wsInitializer = new WebSocketInitializer(SYMBOL, STREAM_URL, ASSET);
+  wsInitializer = new WebSocketInitializer(SYMBOL, STREAM_URL, ASSET, SYM);
 
   const result = await wsInitializer.updateBalances();
   const availableBalance = result.availableBalance;

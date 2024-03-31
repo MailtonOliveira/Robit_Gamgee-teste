@@ -8,10 +8,12 @@ export class WebSocketInitializer {
   ws: WebSocket;
   SYMBOL: string;
   ASSET: string;
+  SYM: string;
 
-  constructor(SYMBOL: string, STREAM_URL: string, ASSET: string) {
+  constructor(SYMBOL: string, STREAM_URL: string, ASSET: string, SYM: string) {
     this.SYMBOL = SYMBOL;
     this.ASSET = ASSET;
+    this.SYM = SYM;
     this.ws = new WebSocket(
       `${STREAM_URL}/${SYMBOL?.toLowerCase()}@bookTicker`
     );
@@ -33,10 +35,10 @@ export class WebSocketInitializer {
     console.log(updateMessage(this.ASSET, availableBalance));
 
     const solBalance = balances.find(
-      (balance: { asset: string }) => balance.asset === this.SYMBOL
+      (balance: { asset: string }) => balance.asset === this.SYM
     );
     const solAvailableBalance = parseFloat(solBalance?.free ?? "0");
-    console.log(updateMessage(this.SYMBOL, solAvailableBalance));
+    console.log(updateMessage(this.SYM, solAvailableBalance));
     return { availableBalance, solAvailableBalance };
   }
 

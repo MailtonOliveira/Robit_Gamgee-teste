@@ -4,8 +4,7 @@ import { getBalance } from "../Controllers/balanceController";
 import { WebSocketInitializer } from "../services/monitorService";
 import prisma from "../database/prismaCliente";
 import { buyMessage, sellMessage } from "../services/messagesService";
-import { SYMBOL, STREAM_URL, ASSET, SYM, BUY_QTY } from "../Configs/config";
-import { ExchangeInfoController } from "../Controllers/exchangeInfoController";
+import { SYMBOL, STREAM_URL, ASSET, BUY_QTY } from "../Configs/config";
 
 let buyExecuted = false;
 let sellExecuted = false;

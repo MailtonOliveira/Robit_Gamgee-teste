@@ -8,8 +8,7 @@ import { SUCCESS } from "./constants/success";
 import { Request, Response } from "express";
 import { SYMBOL, STREAM_URL, ASSET, PORT, SYM } from "./Configs/config";
 import { WebSocketInitializer } from "./services/monitorService";
-
-const { startNgrok } = require("./Controllers/ngrokController");
+import { startNgrok } from "./Controllers/ngrokController";
 dotenv.config();
 
 async function main() {
@@ -18,8 +17,8 @@ async function main() {
   app.use(express.json());
   app.use(routes);
 
-  startNgrok(PORT)
-    .then((ngrokUrl: string) => {
+  // startNgrok(PORT)
+  //   .then((ngrokUrl: string) => {
       const wsInitializer = new WebSocketInitializer (SYMBOL, STREAM_URL, ASSET, SYM);
 
       // Inicia o servidor Express
@@ -40,10 +39,10 @@ async function main() {
           console.log(ERRORS.DATABASE.SEQERROR);
         }
       });
-    })
-    .catch((err: any) => {
-      console.error("Error starting Ngrok:", err);
-    });
+    // })
+    // .catch((err: any) => {
+    //   console.error("Error starting Ngrok:", err);
+    // });
 }
 
 main().catch(async (e) => {
